@@ -1,0 +1,71 @@
+@page "/trainers"
+@using MySpaApp.Models
+@using MySpaApp.Services
+@inject ITrainerService TrainerService
+@inject NavigationManager NavigationManager
+
+<h3>Список тренеров</h3>
+
+@if (trainers == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Код</th>
+                <th>Фамилия</th>
+                <th>Имя</th>
+                <th>Вид спорта</th>
+                <th>Стаж</th>
+                <th>Оклад</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in trainers)
+            {
+                <tr>
+                    <td>@t.Id</td>
+                    <td>@t.LastName</td>
+                    <td>@t.FirstName</td>
+                    <td>@t.Sport</td>
+                    <td>@t.Experience</td>
+                    <td>@t.Salary.ToString("C")</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" @onclick="() => Edit(t.Id)">Ред.</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => Delete(t.Id)">Удал.</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<button class="btn btn-success" @onclick="AddNew">Добавить тренера</button>
+
+@code {
+    private List<Trainer>? trainers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTrainers();
+    }
+
+    private async Task LoadTrainers()
+    {
+        trainers = await TrainerService.GetAllAsync();
+    }
+
+    private void AddNew() => NavigationManager.NavigateTo("/trainer-edit/0");
+
+    private void Edit(int id) => NavigationManager.NavigateTo($"/trainer-edit/{id}");
+
+    private async Task Delete(int id)
+    {
+        await TrainerService.DeleteAsync(id);
+        await LoadTrainers();
+    }
+}

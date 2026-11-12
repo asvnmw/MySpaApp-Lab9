@@ -1,0 +1,59 @@
+@page "/trainer-edit/{Id:int}"
+@using MySpaApp.Models
+@using MySpaApp.Services
+@inject ITrainerService TrainerService
+@inject NavigationManager NavigationManager
+
+<h3>@(Id == 0 ? "Новый тренер" : "Редактирование тренера")</h3>
+
+<EditForm Model="trainer" OnValidSubmit="Save">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <label class="form-label">Фамилия</label>
+        <InputText @bind-Value="trainer.LastName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Имя</label>
+        <InputText @bind-Value="trainer.FirstName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Вид спорта</label>
+        <InputText @bind-Value="trainer.Sport" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Стаж (лет)</label>
+        <InputNumber @bind-Value="trainer.Experience" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Оклад</label>
+        <InputNumber @bind-Value="trainer.Salary" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancel">Отмена</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Trainer trainer = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != 0)
+        {
+            var existing = await TrainerService.GetByIdAsync(Id);
+            if (existing != null) trainer = existing;
+        }
+    }
+
+    private async Task Save()
+    {
+        if (Id == 0) await TrainerService.AddAsync(trainer);
+        else await TrainerService.UpdateAsync(trainer);
+
+        NavigationManager.NavigateTo("/trainers");
+    }
+
+    private void Cancel() => NavigationManager.NavigateTo("/trainers");
+}
