@@ -1,0 +1,41 @@
+name: Docker Network Test
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Проверка кода из репозитория
+      uses: actions/checkout@v4
+
+    - name: Создание пользовательской сети
+      run: docker network create app-network
+
+    - name: Запуск контейнера с базой данных
+      run: |
+        docker run -d --name db \
+          --network app-network \
+          -e POSTGRES_PASSWORD=postgres \
+          -e POSTGRES_DB=appdb \
+          postgres:16
+
+    - name: Сборка образа приложения
+      run: docker build -t backend-app .
+
+    - name: Запуск контейнера приложения
+      run: |
+        docker run -d --name backend-container \
+          --network app-network \
+          -p 8080:8080 \
+          -e DB_CONNECTION="Host=db;Port=5432;Database=appdb;Username=postgres;Password=postgres" \
+          backend-app
+
+    - name: Проверка сетевого взаимодействия
+      run: |
+        sleep 15
+        docker network inspect app-network
+        curl -f http://localhost:8080/items || exit 1
+        echo "Сетевое взаимодействие между контейнерами работает!"
