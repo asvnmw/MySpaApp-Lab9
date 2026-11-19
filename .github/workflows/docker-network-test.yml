@@ -23,7 +23,7 @@ jobs:
           postgres:16
 
     - name: Сборка образа приложения
-      run: docker build -t backend-app .
+      run: docker build --no-cache -t backend-app .
 
     - name: Запуск контейнера приложения
       run: |
@@ -35,7 +35,7 @@ jobs:
 
     - name: Проверка сетевого взаимодействия
       run: |
-        sleep 15
+        sleep 25
         docker network inspect app-network
         curl -f http://localhost:8080/items || exit 1
         echo "Сетевое взаимодействие между контейнерами работает!"
