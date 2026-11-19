@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MySpaApp.Components;
 using MySpaApp.Services;
 using MySpaApp.Hubs; // Если ваш Hub лежит в папке Hubs
+using MySpaApp;
 
 var builder = WebApplication.CreateBuilder(args);
 
